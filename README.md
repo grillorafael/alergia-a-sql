@@ -23,31 +23,83 @@ Esse pensamento é bastante comum, pouco eficiente e bastante errado. Quando ass
 Quando assumimos o item 2, ganhamos o fator otimização porém perdemos no fator manutenibilidade.
 
 Você pode alegar que não se pode ganhar todas né? Nesse caso, você pode sim ganhar todas.
+
 ## Functions e Procedures
 
-Funções internas do banco de dados são normalmente chamadas de Procedure ou Routine. Essas procedures se comportam como uma função em qualquer linguagem de programação, ou seja, podemos chama-las através de queries, podemos utilizá-las em outras procedures e podemos também chama-las através do nosso ORM de preferência.
+Funções internas do banco de dados são normalmente chamadas de Procedure ou Routine. Essas procedures se comportam como uma função em qualquer linguagem de programação, ou seja, podemos chama-las através de consultas, podemos utilizá-las em outras procedures e podemos também chama-las através do nosso ORM de preferência.
 
-### Funções nativas do PostgreSQL
-O PostgreSQL possui uma série de [funções implementadas por padrão](http://rob.conery.io/2015/02/24/embracing-sql-in-postgres/) que podem ajudar bastante no desenvolvimento de aplicações. Vamos exemplificar algumas que acreditamos serem as mais desconhecidas e interessantes.
+Se quiser ler mais sobre procedures nativas do PostgreSQL tem uma [matéria bem legal](http://rob.conery.io/2015/02/24/embracing-sql-in-postgres/) dando uma palhinha do que ele pode fazer por você.
 
-#### Manipulação de Datas
-O PostgreSQL possui um tipo de dados chamado de interval que é um tipo que lida com datas e horas. Através do tipo interval é possível manipular datas de diversas formas diferentes como exemplificado abaixo.
+### Minhas procedures
 
+Você também pode definir procedures para trabalhar com suas tabelas e fazer operações nos seus dados. A forma de definir é bastante simples.
+
+```sql
+CREATE OR REPLACE FUNCTION hello_world(p_name character varying)
+RETURNS character varying
+AS
+$BODY$
+BEGIN
+    RETURN CONCAT('Hello, ', p_name, '!');
+END;
+$BODY$
+    LANGUAGE plpgsql VOLATILE;
 ```
-select '1 week' + now() as a_week_from_now;
-        a_week_from_now
--------------------------------
- 2015-03-03 10:08:12.156656+01
+
+Para executar a procedure basta realizar uma consulta nela.
+
+```sql
+select hello_world('rafael');
+
+-- Retorno
+hello_world
+----------------
+Hello, Rafael!
 (1 row)
 ```
 
-[TODO]
+Podemos ver então que a declaração de uma procedure é bastante simples e flexível. Podemos ter funções com diversos retornos como tabelas, tipos nativos e tipos criados pelo usuário.
 
-#### Exemplos
+Existe também aqueles que gostam de trabalhar somente com SQL por já ter se estressado o suficiente com o ORM e tentou [recriar o Devise utilizando procedures](http://rob.conery.io/2015/02/21/its-time-to-get-over-that-stored-procedure-aversion-you-have/) (Este é um artigo bastante interessante de alguém que cansou de ter problemas com ORMs).
 
-Não precisamos de muita análise para perceber o problema que existe nesse trecho de código. Podemos facilmente reescrever esse trecho e encapsula-lo em uma Procedure como exemplificado abaixo.
+## Lógica de Dados VS Lógica de Negócios
+Hoje em dia chamados tudo que está rodando na nossa aplicação de lógica de negócios mas nem tudo é. É importante conhecer os limites e as diferenças do que é **lógica de dados** e o que é **lógica de negócios**.
+
+### Lógica de Dados
+Lógico de dados é tudo aquilo que opera somente na camada dos dados (Duh), ou seja, é tudo aquilo que representa condições do nosso dado.
+
+Exemplos:
+1. Criptografia de senhas
+1. Timestamps de tabela (createdAt, updatedAt)
+1. Softdelete (deletedAt)
+1. Consistências (Verificação de unicidade, chaves primárias, etc)
+1. Quando criar registro X, criar registro Y também
+
+### Lógica de Negócios
+1. Quando um usuário criar uma conta, disparar um Email de boas vindas
+1. Quando o usuário inserir um registro na tabela, notificar via SMS outro usuário
+1. Usuário x só pode acessar lugares x, y e z do sistema
+
+Para fazer a lógica de negócios funcionar, devemos mapear a lógica em dados e trabalhar a lógica de dados para atender nossa lógica de negócios.
+
+Em um mundo ideal existe uma completa separação entre essas lógicas mas no mundo real isso acaba se sobrepondo para agilizar o desenvolvimento.
+
+## Como escrever SQL da forma certa
+Nos pegamos então em um mundo onde é inevitável escrever SQL. Em algum momento das nossas aplicações, vamos ter que colocar um SQL no meio do nosso código para resolver uma consulta complexa. Quando isso acontecer o que devemos fazer?
+
+### Meça
+Consultas difíveis de escrever no ORM não é o único motivo para escrever SQL na sua aplicação. [Muitas vezes o ORM que você está usando é lento](https://www.airpair.com/ruby-on-rails/performance) para determinadas tarefas. Para resolver isso, fuja um pouco dele e trabalhe no nível do SQL.
+
+### Separe as lógicas
+Saiba separar o seu SQL do código da aplicação. Crie uma procedure e faça chamada a ela. Dessa forma você desacopla a lógica da consulta da lógica da aplicação e se um dia essa consulta operar de forma diferente basta atualizar a procedure.
+
+## Aproveite o melhor dos dois mundos
+Longe do meu objetivo querer convencer a parar de usar ORMs mas devemos saber medir e tomar decisões através de dados sobre como usa-lo da forma correta. ORMs não solucionam todos os problemas de acesso a dado mas sim resolvem alguns adicionando uma série de outros problemas.
+
+Alguns exemplos:
 
 Antes
+Aplicaçao
 ```javascript
 var sql = '';
 sql += ' SELECT p1.id, p1.nome, p1.descricao,  ST_AsGeoJSON(p1."poiGeometrico") geojson, a1.nome "acervo_nome", c1.nome "categoria_nome", p1."urlIcone", ';
@@ -74,7 +126,8 @@ db.sequelize.query(sql, null, {
 ```
 
 Depois
-```SQL
+SQL
+```sql
 CREATE OR REPLACE FUNCTION deteccao_de_impacto(
     p_categoria_id1 integer,
     p_categoria_id2 integer,
@@ -117,17 +170,17 @@ BEGIN
         c2.nome categoria_nome2,
         p2.urlIcone urlIcone2,
         ST_Distance(
-            ST_Transform(p1.poiGeometrico, 3067), 
+            ST_Transform(p1.poiGeometrico, 3067),
             ST_Transform(p2.poiGeometrico, 3067)
         ) distancia
-    FROM 
+    FROM
         Poi p1,
         Poi p2,
         Acervo a1,
         Acervo a2,
         Categoria c1,
         Categoria c2
-    WHERE 
+    WHERE
         c1.id = p_categoria_id1 AND
         c2.id = p_categoria_id2 AND
         p1.AcervoId = a1.id AND
@@ -135,7 +188,7 @@ BEGIN
         p1.CategoriumId = c1.id AND
         p2.CategoriumId = c2.id AND
         ST_Distance(
-            ST_Transform(p1.poiGeometrico, 3067), 
+            ST_Transform(p1.poiGeometrico, 3067),
             ST_Transform(p2.poiGeometrico, 3067)
         ) < p_distancia
     ;
@@ -147,6 +200,7 @@ ALTER FUNCTION deteccao_de_impacto(integer, integer, integer)
   OWNER TO postgres;
 ```
 
+Aplicaçao
 ```javascript
 var sql = "select deteccao_de_impacto(:categoriaId1, :categoriaId2, :distancia)";
 var parametros = {
@@ -162,11 +216,3 @@ db.sequelize.query(sql, null, {
         res.send(data);
     });
 ```
-
-### Então vamos usar SQL para tudo!
-
-“Agora que eu sei tudo de SQL! Vou usar SQL em tudo!”
-
-### Não existe bala de prata
-
-### Conclusões
