@@ -94,11 +94,12 @@ Consultas difíveis de escrever no ORM não é o único motivo para escrever SQL
 Saiba separar o seu SQL do código da aplicação. Crie uma procedure e faça chamada a ela. Dessa forma você desacopla a lógica da consulta da lógica da aplicação e se um dia essa consulta operar de forma diferente basta atualizar a procedure.
 
 ## Aproveite o melhor dos dois mundos
-Longe do meu objetivo querer convencer a parar de usar ORMs mas devemos saber medir e tomar decisões através de dados sobre como usa-lo da forma correta. ORMs não solucionam todos os problemas de acesso a dado mas sim resolvem alguns adicionando uma série de outros problemas.
+Longe do meu objetivo querer convencer a parar de usar ORMs mas devemos saber medir e tomar decisões através de dados. ORMs não solucionam todos os problemas de acesso a dado mas sim resolvem alguns adicionando uma série de outros problemas.
 
 Alguns exemplos:
 
 Antes
+
 Aplicaçao
 ```javascript
 var sql = '';
@@ -126,6 +127,7 @@ db.sequelize.query(sql, null, {
 ```
 
 Depois
+
 SQL
 ```sql
 CREATE OR REPLACE FUNCTION deteccao_de_impacto(
