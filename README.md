@@ -14,6 +14,7 @@ Mas a questão é, como e porque devemos perder o medo do SQL?
 Quando estamos envolvidos demais com os ORMs que utilizamos para fazer aplicações, tentamos cada vez mais resolver os problemas de acesso de dados utilizando os recursos do ORM que muitas vezes são muito bons e completos.
 
 Porém, quando precisamos resolver consultas mais complexas, nós enfrentamos elas geralmente de duas formas diferentes:
+
 1. Realizando diversas buscas e processando a nível de aplicação
 1. Escrever uma String de SQL e executá-la com o ORM
 
@@ -24,7 +25,7 @@ Quando assumimos o item 2, ganhamos o fator otimização porém perdemos no fato
 
 Você pode alegar que não se pode ganhar todas né? Nesse caso, você pode sim ganhar todas.
 
-## Functions e Procedures
+## Routines e Procedures
 
 Funções internas do banco de dados são normalmente chamadas de Procedure ou Routine. Essas procedures se comportam como uma função em qualquer linguagem de programação, ou seja, podemos chama-las através de consultas, podemos utilizá-las em outras procedures e podemos também chama-las através do nosso ORM de preferência.
 
@@ -63,12 +64,13 @@ Podemos ver então que a declaração de uma procedure é bastante simples e fle
 Existe também aqueles que gostam de trabalhar somente com SQL por já ter se estressado o suficiente com o ORM e tentou [recriar o Devise utilizando procedures](http://rob.conery.io/2015/02/21/its-time-to-get-over-that-stored-procedure-aversion-you-have/) (Este é um artigo bastante interessante de alguém que cansou de ter problemas com ORMs).
 
 ## Lógica de Dados VS Lógica de Negócios
-Hoje em dia chamados tudo que está rodando na nossa aplicação de lógica de negócios mas nem tudo é. É importante conhecer os limites e as diferenças do que é **lógica de dados** e o que é **lógica de negócios**.
+Hoje em dia chamamos tudo que está rodando na nossa aplicação de lógica de negócios, porém, não é bem assim. É importante conhecer os limites e as diferenças do que é **lógica de dados** e o que é **lógica de negócios**.
 
 ### Lógica de Dados
 Lógico de dados é tudo aquilo que opera somente na camada dos dados (Duh), ou seja, é tudo aquilo que representa condições do nosso dado.
 
 Exemplos:
+
 1. Criptografia de senhas
 1. Timestamps de tabela (createdAt, updatedAt)
 1. Softdelete (deletedAt)
@@ -88,13 +90,13 @@ Em um mundo ideal existe uma completa separação entre essas lógicas mas no mu
 Nos pegamos então em um mundo onde é inevitável escrever SQL. Em algum momento das nossas aplicações, vamos ter que colocar um SQL no meio do nosso código para resolver uma consulta complexa. Quando isso acontecer o que devemos fazer?
 
 ### Meça
-Consultas difíveis de escrever no ORM não é o único motivo para escrever SQL na sua aplicação. [Muitas vezes o ORM que você está usando é lento](https://www.airpair.com/ruby-on-rails/performance) para determinadas tarefas. Para resolver isso, fuja um pouco dele e trabalhe no nível do SQL.
+Consultas difíceis de escrever no ORM não é o único motivo para escrever SQL na sua aplicação. [Muitas vezes o ORM que você está usando é lento](https://www.airpair.com/ruby-on-rails/performance) para determinadas tarefas. Para resolver isso, fuja um pouco dele e trabalhe no nível do SQL.
 
 ### Separe as lógicas
-Saiba separar o seu SQL do código da aplicação. Crie uma procedure e faça chamada a ela. Dessa forma você desacopla a lógica da consulta da lógica da aplicação e se um dia essa consulta operar de forma diferente basta atualizar a procedure.
+Saiba separar o seu SQL do código da aplicação. Crie uma procedure e faça uma chamada. Dessa forma você desacopla a lógica da consulta da aplicação e se um dia essa consulta operar de forma diferente basta atualizar a procedure.
 
 ## Aproveite o melhor dos dois mundos
-Longe do meu objetivo querer convencer a parar de usar ORMs mas devemos saber medir e tomar decisões através de dados. ORMs não solucionam todos os problemas de acesso a dado mas sim resolvem alguns adicionando uma série de outros problemas.
+Meu objetivo querer convencer a parar de usar ORMs mas saber medir e tomar decisões através de dados. ORMs não solucionam todos os problemas de acesso aos dados mas sim resolvem alguns adicionando uma série de outros problemas.
 
 Alguns exemplos:
 
