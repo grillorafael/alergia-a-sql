@@ -96,7 +96,7 @@ Consultas difíceis de escrever no ORM não é o único motivo para escrever SQL
 Saiba separar o seu SQL do código da aplicação. Crie uma procedure e faça uma chamada. Dessa forma você desacopla a lógica da consulta da aplicação e se um dia essa consulta operar de forma diferente basta atualizar a procedure.
 
 ## Aproveite o melhor dos dois mundos
-Meu objetivo querer convencer a parar de usar ORMs mas saber medir e tomar decisões através de dados. ORMs não solucionam todos os problemas de acesso aos dados mas sim resolvem alguns adicionando uma série de outros problemas.
+Meu objetivo não é convencer ninguém a parar de usar ORMs, mas saber medir e tomar deciões através de dados. ORMs não solucionam todos os problemas de acesso aos dados, além de adicionarem uma camada desnecessária de complexidade na aplicação.
 
 Alguns exemplos:
 
